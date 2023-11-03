@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+void generateCipherSequence(char keyword[], char cipherSequence[]) {
+    char alphabet[] = "abcdefghijklmnopqrstuvwxyz";
+    strcat(keyword, alphabet);
+
+    int i, j;
+    for(i = 0; i < strlen(keyword); i++) {
+        char currentChar = tolower(keyword[i]);
+        int alreadyIncluded = 0;
+        for(j = 0; j < i; j++) {
+            if(tolower(keyword[j]) == currentChar) {
+                alreadyIncluded = 1;
+                break;
+            }
+        }
+        if(!alreadyIncluded) {
+            strncat(cipherSequence, &keyword[i], 1);
+        }
+    }
+}
+void encrypt(char plainText[], char cipherSequence[], char cipherText[]) {
+    int i;
+    for(i = 0; i < strlen(plainText); i++) {
+        if(isalpha(plainText[i])) {
+            if(isupper(plainText[i])) {
+                cipherText[i] = toupper(cipherSequence[plainText[i]-'A']);
+            } else {
+                cipherText[i] = cipherSequence[plainText[i]-'a'];
+            }
+        } else {
+            cipherText[i] = plainText[i];
+        }
+    }
+    cipherText[i] = '\0';
+}
+void decrypt(char cipherText[], char cipherSequence[], char decryptedText[]) {
+    int i;
+    for(i = 0; i < strlen(cipherText); i++) {
+        if(isalpha(cipherText[i])) {
+            if(isupper(cipherText[i])) {
+                decryptedText[i] = toupper(cipherSequence[cipherText[i]-'A']);
+            } else {
+                decryptedText[i] = cipherSequence[cipherText[i]-'a'];
+            }
+        } else {
+            decryptedText[i] = cipherText[i];
+        }
+    }
+    decryptedText[i] = '\0';
+}
+
+int main() {
+    char keyword[] = "CIPHER";
+    char cipherSequence[27] = "";
+    char plainText[] = "hello world";
+    char cipherText[100];
+    char decryptedText[100];
+
+    generateCipherSequence(keyword, cipherSequence);
+
+    encrypt(plainText, cipherSequence, cipherText);
+    decrypt(cipherText, cipherSequence, decryptedText);
+
+    printf("Plain Text: %s\n", plainText);
+    printf("Cipher Text: %s\n", cipherText);
+    printf("Decrypted Text: %s\n", decryptedText);
+
+    return 0;
+}

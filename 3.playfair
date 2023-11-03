@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+void prepareKey(char *key, char *cleanKey) {
+    int i, j = 0;
+    int len = strlen(key);
+    char temp[26] = {0};
+    for (i = 0; i < len; i++) {
+        if (isalpha(key[i])) {
+            key[i] = toupper(key[i]);
+            if (temp[key[i] - 'A'] == 0) {
+                temp[key[i] - 'A'] = 1;
+                cleanKey[j++] = key[i];
+            }
+        }
+    }
+    len = j;
+    for (i = 'A'; i <= 'Z'; i++) {
+        if (i != 'J' && temp[i - 'A'] == 0) {
+            cleanKey[len++] = i;
+        }
+    }
+}
+void generateMatrix(char *key, char matrix[5][5]) {
+    char cleanKey[26];
+    prepareKey(key, cleanKey);
+    int k = 0;
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            matrix[i][j] = cleanKey[k++];
+        }
+    }
+}
+void findPosition(char matrix[5][5], char letter, int *row, int *col) {
+    if (letter == 'J') letter = 'I'; // Treat 'J' as 'I'
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (matrix[i][j] == letter) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+void encryptPair(char matrix[5][5], char a, char b, char *cipher) {
+    int rowA, colA, rowB, colB;
+    findPosition(matrix, a, &rowA, &colA);
+    findPosition(matrix, b, &rowB, &colB);
+
+    if (rowA == rowB) {
+        cipher[0] = matrix[rowA][(colA + 1) % 5];
+        cipher[1] = matrix[rowB][(colB + 1) % 5];
+    } else if (colA == colB) {
+        cipher[0] = matrix[(rowA + 1) % 5][colA];
+        cipher[1] = matrix[(rowB + 1) % 5][colB];
+    } else {
+        cipher[0] = matrix[rowA][colB];
+        cipher[1] = matrix[rowB][colA];
+    }
+}
+int main() {
+    char key[26];
+    char plaintext[100], ciphertext[100];
+    char matrix[5][5];
+    printf("Enter the key (no spaces and only uppercase letters): ");
+    scanf("%s", key);
+    printf("Enter the plaintext (no spaces and only uppercase letters): ");
+    scanf("%s", plaintext);
+    generateMatrix(key, matrix);
+    int len = strlen(plaintext);
+    int i = 0, j = 0;
+    while (i < len) {
+        char a = plaintext[i++];
+        char b = plaintext[i++];
+        if (a == 'J') a = 'I';
+        if (b == 'J') b = 'I';
+        if (a == b) {
+            b = 'X';
+            i--;
+        }
+        encryptPair(matrix, a, b, &ciphertext[j]);
+        j += 2;
+    }
+    ciphertext[j] = '\0';
+    printf("Encrypted Text: %s\n", ciphertext);
+    return 0;
+}
